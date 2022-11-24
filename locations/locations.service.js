@@ -3,7 +3,28 @@
 const Location = require('./locations.model')
 
 function findAll () {
-	return [1,2,3,4]
+	return Location.find()
 }
 
-module.exports.findAll = findAll
+function find(id) {
+	return Location.findOne(
+		{_id:id}
+	)
+}
+
+function create(updateInfo){
+	return Location.insertMany(updateInfo)
+
+}
+
+function update(id,updateInfo){
+	const location = find(id);
+	return location.update(updateInfo)
+
+}
+
+function deleteO(id){
+	return Location.deleteOne(find({_id:id}))
+}
+
+module.exports = {findAll,find,update,deleteO,create}
