@@ -1,13 +1,14 @@
 const express = require('express')
 const locationController = require('./locations/locations.controller')
 const usersController = require('./users/users.controller')
-
+const localStrategy = require("./authentication/local.strategy")
+const mongoose = require('mongoose')
+require('dotenv').config()
 
 const app = express()
 const port = 3000
 
-const mongoose = require('mongoose')
-require('dotenv').config()
+
 
 app.use(locationController)
 app.use(usersController)
@@ -19,10 +20,6 @@ async function main(){
     })
 }
 main()
-
-
-
-
 
 
 app.get('', (req,res) => {    res.send("Hello World")})
