@@ -14,6 +14,7 @@ router.post('/users/register', async (req, res) => {
     }
     catch (e)
     {
+        // Code d'erreur pour un utilisateur existant déjà dans la bdd
         if(e.code==11000)
         {
             res.status(400).send("Username already exists")
@@ -61,11 +62,40 @@ router.post('/users/login',
             { user_id: user._id},
             process.env.TOKEN_KEY,
             {
-                expiresIn: "1h",
+                expiresIn: "3600",
             }
         );
         res.status(200).send({"token" : token})
     });
 
+const verifyUserToken = async (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).send("Unauthorized request");
+    }
+    const token = req.headers["authorization"].split(" ")[1];
+    if (!token) {
+        return res.status(401).send("Access denied. No token provided.");
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+        req.user_id = decoded.user_id;
+        const role = await loginService.findR(req.user_id)
+        req.user_role = role
+        next();
+    } catch (err) {
+        res.status(400).send("Invalid token.");
+    }
+};
+
+
+/** Check les roles autorisés à accéder à une requete*/
+function roleMiddleware (allowedRoles) {
+    return function (req, res, next) {
+        if (allowedRoles.includes(req.user_role)) {
+            return next()
+        }
+        return res.status(403).send()
+    }
+}
 
 module.exports = router
